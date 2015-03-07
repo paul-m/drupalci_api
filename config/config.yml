@@ -1,0 +1,7 @@
+jenkins:
+  host:  localhost
+  token: 123456
+  job:   test
+
+log:
+  file: our.log

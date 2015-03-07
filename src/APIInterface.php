@@ -6,62 +6,71 @@ use Silex\Application;
 
 /**
  * @file
- * Defined interface for DrupalCI API.
+ * Interface for DrupalCI API.
  */
 
 interface APIInterface {
 
   /**
    * Information on how to use the API.
-   * @return message.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function home();
 
   /**
    * Runs a job.
-   * @return id.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobRun(Application $app);
 
   /**
    * Get the status of a job.
-   * @return status.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobStatus(Application $app, $id);
 
   /**
    * Cancel a job.
-   * @return id.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobCancel(Application $app, $id);
 
   /**
    * Restarts a job.
-   * @return id.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobRestart(Application $app, $id);
 
   /**
    * Gets a jobs console output from the dispatcher.
-   * @return console output.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobConsole(Application $app, $id);
 
   /**
    * Get the results of the build.
-   * @return results.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobResults(Application $app, $id);
 
   /**
    * Authenticate against the API.
-   * @return success.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function auth(Application $app, $token);
 
   /**
    * Get global API status.
-   * @return status.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function status(Application $app);
 

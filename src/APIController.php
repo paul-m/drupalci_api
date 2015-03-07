@@ -10,78 +10,90 @@ use Silex\Application;
  * A base controller class that we can extend from for future API.
  */
 
-class APIController implements APIInterface {
+/**
+ * Base class for implementing our API interface.
+ */
+abstract class APIController implements APIInterface {
 
   /**
    * Information on how to use the API.
-   * @return message.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function home() {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Runs a job.
-   * @return id.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobRun(Application $app) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Get the status of a job.
-   * @return status.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobStatus(Application $app, $id) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Cancel a job.
-   * @return id.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobCancel(Application $app, $id) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Restarts a job.
-   * @return id.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobRestart(Application $app, $id) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Gets a jobs console output from the dispatcher.
-   * @return console output.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobConsole(Application $app, $id) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Get the results of the build.
-   * @return results.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function jobResults(Application $app, $id) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Authenticate against the API.
-   * @return success.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function auth(Application $app, $token) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
   /**
    * Get global API status.
-   * @return status.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
    */
   public function status(Application $app) {
-    return new Response("Not supported.");
+    return new Response("Not supported.", 501);
   }
 
 }
