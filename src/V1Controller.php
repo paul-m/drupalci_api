@@ -67,7 +67,7 @@ class V1Controller extends APIController {
     }
 
     // Let the request begin.
-    // Jenkins should be a service:
+    // @todo Jenkins should be a service:
     // $jenkins = $app['jenkins'];
     $jenkins = new Jenkins();
     $jenkins->setHost($app['config']['jenkins']['host']);
