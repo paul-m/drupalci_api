@@ -3,12 +3,11 @@
     "silex/silex": "~1.2",
     "guzzlehttp/guzzle": "*",
     "symfony/yaml":"~2.4",
-    "symfony/config":"v2.2.0",
-    "deralex/yaml-config-service-provider": "1.0.x-dev",
-    "monolog/monolog": "~1"
+    "symfony/config":"~2.4",
+    "deralex/yaml-config-service-provider": "~1.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.4.*@dev",
+    "phpunit/phpunit": "~4.4",
     "satooshi/php-coveralls": "v0.6.1",
     "symfony/browser-kit": "~2"
   },
