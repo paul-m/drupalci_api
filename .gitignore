@@ -4,3 +4,4 @@ bin
 build
 .bundle
 .vagrant
+*.sqlite

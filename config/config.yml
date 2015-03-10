@@ -3,5 +3,5 @@ jenkins:
   token: 123456
   job:   test
 
-log:
-  file: our.log
+db.options:
+  driver: pdo_sqlite

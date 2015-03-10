@@ -2,3 +2,7 @@ jenkins:
   host:  localhost
   token: 123456
   job:   test
+
+db.options:
+  driver: pdo_sqlite
+  file: drupalci_api_test.sqlite

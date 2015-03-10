@@ -9,6 +9,10 @@ namespace API\Tests;
 
 use Silex\WebTestCase;
 use DerAlex\Silex\YamlConfigServiceProvider;
+use Doctrine\Common\DataFixtures\Loader;
+use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use API\Tests\Fixtures\APIFixture;
 
 /**
  * Base test class for API tests.
@@ -32,6 +36,13 @@ class Api1TestBase extends WebTestCase {
       $app->register(new YamlConfigServiceProvider($test_config_path));
     }
 
+    // Load the fixture and persist it to the database.
+    $loader = new Loader();
+    $loader->addFixture(new APIFixture());
+    $executor = new ORMExecutor($app['orm.em'], new ORMPurger());
+    $executor->execute($loader->getFixtures(), FALSE);
+
     return $app;
   }
+
 }

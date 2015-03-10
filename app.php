@@ -23,12 +23,16 @@ if (file_exists($config)) {
   $app->register(new YamlConfigServiceProvider($config));
 }
 
-$app->register(new DoctrineServiceProvider(), array(
-  'db.options' => array(
+$db_options = array_merge(
+  [
     'driver' => 'pdo_sqlite',
-    'path' => __DIR__ . '/app.db',
-  ),
-));
+    'path' => __DIR__ . '/drupalci_api.sqlite',
+  ],
+  $app['config']['db.options']
+);
+
+$app->register(new DoctrineServiceProvider(), ['db.options' => $db_options]);
+unset($db_options);
 
 $app->register(new DoctrineOrmServiceProvider(), array(
   "orm.proxies_dir" => __DIR__ . '/proxies',

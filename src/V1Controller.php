@@ -39,6 +39,22 @@ class V1Controller extends APIController {
    * @param mixed $id
    */
   public function jobStatus(Application $app, $id) {
+    $em = $app['orm.em'];
+    $job = $em->find('\API\Entities\Job', $id);
+    if ($job) {
+      $job_array = [
+        'id' => $id,
+//      'created' => 0,
+        'repository' => $job->getRepository(),
+        'branch' => $job->getBranch(),
+        'patch' => $job->getPatch(),
+        'status' => $job->getStatus(),
+        'result' => $job->getResult(),
+        'log' => $job->getLog(),
+      ];
+      $response = $app->json($job_array, 200);
+      return $response;
+    }
     // Currently we can't return any information.
     $job = [
       'status' => 404,

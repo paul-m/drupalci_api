@@ -17,7 +17,7 @@ class V1ControllerTest extends Api1TestBase {
    */
   public function testJobStatus404() {
     $client = $this->createClient();
-    $crawler = $client->request('GET', $this->apiPrefix() . '/job/status/1');
+    $crawler = $client->request('GET', $this->apiPrefix() . '/job/status/0');
     $response = $client->getResponse();
     $json = json_decode($response->getContent());
 
@@ -26,12 +26,24 @@ class V1ControllerTest extends Api1TestBase {
     $this->assertNotEmpty($json->message);
   }
 
+  public function testJobStatus() {
+    $client = $this->createClient();
+    $crawler = $client->request('GET', $this->apiPrefix() . '/job/status/1');
+    $response = $client->getResponse();
+
+    $this->assertEquals(200, $response->getStatusCode());
+    $this->assertEquals(
+      '{"id":"1","repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log"}',
+      $response->getContent()
+    );
+  }
+
   /**
    * Starting a job without a fixture should result in 404.
    */
   public function testJobRun() {
     $client = $this->createClient();
-    $crawler = $client->request('GET', $this->apiPrefix() . '/job/status/1');
+    $crawler = $client->request('GET', $this->apiPrefix() . '/job/status/0');
     $response = $client->getResponse();
     $json = json_decode($response->getContent());
 

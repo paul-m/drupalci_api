@@ -1,13 +1,15 @@
 Testing DrupalCI API
 ===
 
-The tests for DrupalCI API are written in the PHPUnit framework. They also use Symfony2's BrowserKit Client for web-based testing.
+The tests for DrupalCI API are written in the PHPUnit framework. Doctrine fixtures and Symfony2's BrowserKit Client for web-based testing.
 
 To run the tests:
 
-	$ cd drupalci_api
-	$ composer install --dev
-	$ ./bin/phpunit
+    $ cd drupalci_api
+    $ composer install --dev
+    $ ./bin/doctrine orm:schema:drop --force
+    $ ./bin/doctrine orm:schema:create
+    $ ./bin/phpunit
 
 To write tests, you can:
 
