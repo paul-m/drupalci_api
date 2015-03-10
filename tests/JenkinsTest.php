@@ -3,6 +3,7 @@
 namespace API\Tests;
 
 use API\Jenkins;
+use API\Entities\Job;
 
 /**
  * Class JenkinsTest.

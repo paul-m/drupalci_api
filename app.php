@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use DerAlex\Silex\YamlConfigServiceProvider;
 use Silex\Application;
+use Silex\Provider\DoctrineServiceProvider;
+use Dflydev\Silex\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
 
 $app = new Application();
 
@@ -21,12 +23,32 @@ if (file_exists($config)) {
   $app->register(new YamlConfigServiceProvider($config));
 }
 
+$app->register(new DoctrineServiceProvider(), array(
+  'db.options' => array(
+    'driver' => 'pdo_sqlite',
+    'path' => __DIR__ . '/app.db',
+  ),
+));
+
+$app->register(new DoctrineOrmServiceProvider(), array(
+  "orm.proxies_dir" => __DIR__ . '/proxies',
+  "orm.em.options" => array(
+    "mappings" => array(
+      array(
+        "type" => "annotation",
+        "namespace" => "API\Entities",
+        "path" => __DIR__ . "/src/Entities",
+      ),
+    ),
+  ),
+));
+
 // After-controller middleware.
 $app->after(function (Request $request, Response $response) {
   // Make sure we wrap JSONP in callback if present.
   if ($response instanceof JsonResponse) {
     $callback = $request->get('callback', '');
-    if($callback) {
+    if ($callback) {
       $response->setCallback($callback);
     }
   }
