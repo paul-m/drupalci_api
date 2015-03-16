@@ -2,6 +2,8 @@
 
 namespace API\Entities;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * @Entity
  * @Table(name="job")
@@ -15,7 +17,10 @@ class Job {
    */
   protected $id;
 
-  /** @Co_lumn(type="datetime", nullable=false) */
+  /**
+   * @Column(type="date", options={"default" = "1990-01-01"})
+   * @var \DateTime
+   */
   protected $created;
 
   /** @Column(type="string", length=255, unique=false, nullable=false) */
@@ -35,6 +40,40 @@ class Job {
 
   /** @Column(type="text", nullable=true) */
   protected $log;
+
+  /**
+   * Construct a Job object.
+   */
+  public function __construct() {
+    // We must put a DateTime object in created or Doctrine will complain.
+    $this->created = new \DateTime();
+  }
+
+  public static function createFromRequest(Request $request) {
+    $query = [
+      'repository' => $request->get('repository', ''),
+      'branch' => $request->get('branch', ''),
+      'patch' => $request->get('patch', ''),
+    ];
+    error_log('query: ' . print_r($query, true));
+    // Sanity check.
+    if (empty($query['repository']) || empty($query['branch'])) {
+      // @todo: Make a meaningful exception class.
+      throw new \Exception('Job start requests need at least a repository and a branch.');
+    }
+    $job = new Job();
+    $job->setBranch($query['branch']);
+    $job->setPatch($query['patch']);
+    $job->setRepository($query['repository']);
+    return $job;
+  }
+
+  /**
+   * @return \DateTime
+   */
+  public function getCreated() {
+    return $this->created;
+  }
 
   /**
    * Get id

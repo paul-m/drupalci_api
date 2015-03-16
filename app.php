@@ -47,6 +47,13 @@ $app->register(new DoctrineOrmServiceProvider(), array(
   ),
 ));
 
+$app->before(function (Request $request) {
+  if (0 === strpos($request->request->headers->get('Content-Type'), 'application/json')) {
+    $data = json_decode($request->getContent(), TRUE);
+    $request->request->replace(is_array($data) ? $data : array());
+  }
+});
+
 // After-controller middleware.
 $app->after(function (Request $request, Response $response) {
   // Make sure we wrap JSONP in callback if present.

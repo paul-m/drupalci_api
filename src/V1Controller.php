@@ -4,6 +4,7 @@ namespace API;
 
 use Symfony\Component\HttpFoundation\Response;
 use Silex\Application;
+use API\Entities\Job;
 
 /**
  * Controller for Version 1 of the DrupalCI API.
@@ -71,16 +72,17 @@ class V1Controller extends APIController {
   public function jobRun(Application $app) {
     // The request we're working on.
     $request = $app['request'];
-    // Get our params.
-    $query = [
-      'repository' => $request->get('repository', ''),
-      'branch' => $request->get('branch', ''),
-      'patch' => $request->get('patch', ''),
-    ];
-    // Parameter check.
-    if (empty($query['repository']) || empty($query['branch'])) {
-      return new Response('Job start requests need at least a repository and a branch.', 400);
+
+    try {
+      $job = Job::createFromRequest($request);
     }
+    catch (\Exception $e) {
+      return new Response('Bad request: ' . $e->getMessage(), 400);
+    }
+
+    $em = $app['orm.em'];
+//    $em->persist($job);
+  //  $em->flush();
 
     // Let the request begin.
     // @todo Jenkins should be a service:

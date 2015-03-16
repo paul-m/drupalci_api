@@ -2,34 +2,15 @@
 
 # Triggers a build that will get sent to the results site and the dispatcher.
 run:
-  path: /job/run
+  path: /job
   defaults: { _controller: 'API\V1Controller::jobRun' }
+  methods: [POST]
 
 # Pulls the results of the job from the results site and the dispatcher.
 status:
-  path: /job/status/{id}
+  path: /job/{id}
   defaults: { _controller: 'API\V1Controller::jobStatus' }
-
-# Cancel the build that has been sent to the dispatcher. Also send the
-# notification to the results site.
-cancel:
-  path: /job/cancel/{id}
-  defaults: { _controller: 'API\V1Controller::jobCancel' }
-
-# Restart a build that has either finished or still currently running.
-restart:
-  path: /job/restart/{id}
-  defaults: { _controller: 'API\V1Controller::jobRestart' }
-
-# Get the console output of the build that is already running.
-console:
-  path: /job/console/{id}
-  defaults: { _controller: 'API\V1Controller::jobConsole' }
-
-# Get the results of the build from the dispatcher and results site.
-results:
-  path: /job/results/{id}
-  defaults: { _controller: 'API\V1Controller::jobResults' }
+  methods: [GET]
 
 # Authenticate with the API to gain access to starting, stopping and restarting jobs.
 auth:
