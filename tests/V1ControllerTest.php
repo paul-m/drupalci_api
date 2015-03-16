@@ -19,14 +19,14 @@ class V1ControllerTest extends Api1TestBase {
     $client = $this->createClient();
     $crawler = $client->request('GET', $this->apiPrefix() . '/job/0');
     $response = $client->getResponse();
-    $json = json_decode($response->getContent());
 
     $this->assertEquals(404, $response->getStatusCode());
+    $json = json_decode($response->getContent());
     $this->assertEquals(404, $json->status);
     $this->assertNotEmpty($json->message);
   }
 
-  public function testJobStatus() {
+  public function te_stJobStatus() {
     $client = $this->createClient();
     $crawler = $client->request('GET', $this->apiPrefix() . '/job/1');
     $response = $client->getResponse();
@@ -37,7 +37,7 @@ class V1ControllerTest extends Api1TestBase {
     );
   }
 
-  public function testJobRun() {
+  public function te_stJobRun() {
     $client = $this->createClient();
     $crawler = $client->request(
       'POST', $this->apiPrefix() . '/job',

@@ -12,6 +12,7 @@ use DerAlex\Silex\YamlConfigServiceProvider;
 use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
 use Dflydev\Silex\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
+use Tobiassjosten\Silex\ResponsibleServiceProvider;
 
 $app = new Application();
 
@@ -55,7 +56,7 @@ $app->before(function (Request $request) {
 });
 
 // After-controller middleware.
-$app->after(function (Request $request, Response $response) {
+/*$app->after(function (Request $request, Response $response) {
   // Make sure we wrap JSONP in callback if present.
   if ($response instanceof JsonResponse) {
     $callback = $request->get('callback', '');
@@ -63,7 +64,7 @@ $app->after(function (Request $request, Response $response) {
       $response->setCallback($callback);
     }
   }
-});
+});*/
 
 /**
  * Error handling.

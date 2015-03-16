@@ -77,7 +77,7 @@ class V1Controller extends APIController {
       $job = Job::createFromRequest($request);
     }
     catch (\Exception $e) {
-      return new Response('Bad request: ' . $e->getMessage(), 400);
+      return new Response('Bad request: ', 400);
     }
 
     $em = $app['orm.em'];
