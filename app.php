@@ -49,7 +49,7 @@ $app->register(new DoctrineOrmServiceProvider(), array(
 ));
 
 $app->before(function (Request $request) {
-  if (0 === strpos($request->request->headers->get('Content-Type'), 'application/json')) {
+  if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
     $data = json_decode($request->getContent(), TRUE);
     $request->request->replace(is_array($data) ? $data : array());
   }

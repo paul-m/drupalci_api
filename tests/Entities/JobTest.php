@@ -50,4 +50,22 @@ class JobTest extends \PHPUnit_Framework_TestCase {
     ];
   }
 
+  /**
+   * @covers ::jsonSerialize
+   */
+  public function testJsonSerialize() {
+    $request = new Request(
+      [
+        'repository' => 'repository_test',
+        'branch' => 'branch_test',
+        'patch' => 'patch_test',
+      ]
+    );
+    $job = Job::createFromRequest($request);
+    $this->assertEquals(
+      '{"id":null,"repository":"repository_test","branch":"branch_test","patch":"patch_test","status":null,"result":null,"log":null}',
+      json_encode($job->jsonSerialize())
+    );
+  }
+
 }

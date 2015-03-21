@@ -5,5 +5,5 @@ home:
   defaults: { _controller: 'API\V1Controller::home' }
 
 api_1:
-  prefix: /drupalci/api/1
+  prefix: drupalci/api/1/
   resource: routes/v1.yml

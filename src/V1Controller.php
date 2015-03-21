@@ -12,19 +12,6 @@ use API\Entities\Job;
 
 class V1Controller extends APIController {
 
-  private function getJobDefault() {
-    return [
-      'id' => NULL,
-      'created' => 0,
-      'repository' => '',
-      'branch' => '',
-      'patch' => '',
-      'status' => NULL,
-      'result' => '',
-      'log' => '',
-    ];
-  }
-
   /**
    * Information on how to use the API.
    * @return message.
@@ -43,17 +30,7 @@ class V1Controller extends APIController {
     $em = $app['orm.em'];
     $job = $em->find('\API\Entities\Job', $id);
     if ($job) {
-      $job_array = [
-        'id' => $id,
-//      'created' => 0,
-        'repository' => $job->getRepository(),
-        'branch' => $job->getBranch(),
-        'patch' => $job->getPatch(),
-        'status' => $job->getStatus(),
-        'result' => $job->getResult(),
-        'log' => $job->getLog(),
-      ];
-      $response = $app->json($job_array, 200);
+      $response = $app->json($job, 200);
       return $response;
     }
     // Currently we can't return any information.
@@ -72,21 +49,23 @@ class V1Controller extends APIController {
   public function jobRun(Application $app) {
     // The request we're working on.
     $request = $app['request'];
-
     try {
       $job = Job::createFromRequest($request);
     }
+    // @todo Make a better exception type.
     catch (\Exception $e) {
-      return new Response('Bad request: ', 400);
+      return new Response('Bad request.', 400);
     }
 
     $em = $app['orm.em'];
-//    $em->persist($job);
-  //  $em->flush();
+    $em->persist($job);
+    $em->flush();
 
     // Let the request begin.
     // @todo Jenkins should be a service:
     // $jenkins = $app['jenkins'];
+    $return = 'fixture'; // BS value while we get Jenkins happening.
+/*
     $jenkins = new Jenkins();
     $jenkins->setHost($app['config']['jenkins']['host']);
     $jenkins->setToken($app['config']['jenkins']['token']);
@@ -94,6 +73,7 @@ class V1Controller extends APIController {
     $jenkins->setQuery($query);
     $return = NULL;
     @$return = $jenkins->send();
+*/
 
     // Check the return to make sure we had a successful submission.
     if (empty($return)) {
@@ -111,7 +91,7 @@ class V1Controller extends APIController {
    * @return success.
    */
   public function auth(Application $app, $token) {
-    // http://silex.sensiolabs.org/doc/providers/security.html
+    // @todo http://silex.sensiolabs.org/doc/providers/security.html
     return new Response("Not supported.", 501);
   }
 

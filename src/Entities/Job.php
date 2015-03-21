@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @Entity
  * @Table(name="job")
  */
-class Job {
+class Job implements \JsonSerializable {
 
   /**
    * @Id
@@ -50,12 +50,16 @@ class Job {
   }
 
   public static function createFromRequest(Request $request) {
-    $query = [
-      'repository' => $request->get('repository', ''),
-      'branch' => $request->get('branch', ''),
-      'patch' => $request->get('patch', ''),
+    $query = [];
+    $query_keys = [
+      'repository',
+      'branch',
+      'patch',
     ];
-    error_log('query: ' . print_r($query, true));
+    foreach ($query_keys as $query_key) {
+      $query[$query_key] = $request->get($query_key, '');
+      error_log("$query_key: $query[$query_key]");
+    }
     // Sanity check.
     if (empty($query['repository']) || empty($query['branch'])) {
       // @todo: Make a meaningful exception class.
@@ -208,6 +212,23 @@ class Job {
    */
   public function getLog() {
     return $this->log;
+  }
+
+  public function jsonSerialize() {
+    $result = new \stdClass();
+    $properties = [
+      'id',
+      'repository',
+      'branch',
+      'patch',
+      'status',
+      'result',
+      'log',
+    ];
+    foreach ($properties as $property) {
+      $result->$property = $this->$property;
+    }
+    return $result;
   }
 
 }
