@@ -58,7 +58,6 @@ class Job implements \JsonSerializable {
     ];
     foreach ($query_keys as $query_key) {
       $query[$query_key] = $request->get($query_key, '');
-      error_log("$query_key: $query[$query_key]");
     }
     // Sanity check.
     if (empty($query['repository']) || empty($query['branch'])) {
