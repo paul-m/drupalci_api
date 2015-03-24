@@ -14,55 +14,30 @@ use API\Entities\Job;
 class JenkinsTest extends \PHPUnit_Framework_TestCase {
 
   /**
-   * Build a Jenkins object and get the URL that will be used for submission.
-   *
-   * @covers ::sendRequest
+   * @covers ::send
    */
-  public function testSendRequest() {
-    // Create a mock guzzle client.
-    $mock_guzzle = $this->getMockBuilder('GuzzleHttp\Client')
-      ->disableOriginalConstructor()
-      ->setMethods(array('get'))
+  public function testSend() {
+    $expected = 'does not contain our original url';
+
+    $mock_response = $this->getMockBuilder('\GuzzleHttp\Message\MessageInterface')
+      ->setMethods(['getHeader'])
+      ->getMockForAbstractClass();
+    $mock_response->expects($this->once())
+      ->method('getHeader')
+      ->willReturn($expected);
+
+    $mock_client = $this->getMockBuilder('\GuzzleHttp\Client')
+      ->setMethods(['get'])
       ->getMock();
-    // Set the mock for the get() method.
-    $mock_guzzle->expects($this->once())
+    $mock_client->expects($this->once())
       ->method('get')
-      ->willReturnCallback(function ($url, $params) {
-        return [$url, $params];
-      });
+      ->willReturn($mock_response);
 
-    $jenkins = new Jenkins($mock_guzzle);
-    $jenkins->setProtocol('https');
-    $jenkins->setHost('localhost');
-    $jenkins->setPort('9090');
-    $jenkins->setBuild('foo');
-    $jenkins->setToken('99999999');
-    $jenkins->setQuery(array(
-      'repository' => 'baz',
-      'branch' => 'bar',
-      'patch' => 'bas'
-    ));
-    $request = $jenkins->sendRequest();
-
-    // Check a successful request.
-    $expected = [
-      'https://localhost:9090/job/foo/buildWithParameters',
-      [
-        'query' => [
-          'token' => '99999999',
-          'repository' => 'baz',
-          'branch' => 'bar',
-          'patch' => 'bas',
-        ],
-        'verify' => FALSE,
-      ]
-    ];
-    $this->assertEquals($expected, $request);
-
-    // Check a successful return message.
-    // @todo Move this to another test.
-//    $message = $jenkins->send();
-//    $this->assertEquals('The message has been sent to the dispatcher.', $message);
+    $jenkins = new Jenkins();
+    $jenkins->setClient($mock_client);
+    $jenkins->setBuild('test_build');
+    $jenkins->setToken('test_token');
+    $this->assertEquals($expected, $jenkins->send());
   }
 
 }

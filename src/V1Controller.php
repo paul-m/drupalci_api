@@ -38,6 +38,7 @@ class V1Controller extends APIController {
       'status' => 404,
       'message' => 'Record could not be found.',
     ];
+    // @todo: Ping Jenkins to find out an update.
     $response = $app->json($job, 404);
     return $response;
   }
@@ -47,6 +48,10 @@ class V1Controller extends APIController {
    * @return id.
    */
   public function jobRun(Application $app) {
+    // Default behavior if nothing else works out.
+    $message = 'Unable to run job.';
+    $response = new Response($message, 501);
+
     // The request we're working on.
     $request = $app['request'];
     try {
@@ -57,33 +62,33 @@ class V1Controller extends APIController {
       return new Response('Bad request.', 400);
     }
 
+    // We have to persist our Job entity in order to generate an ID.
     $em = $app['orm.em'];
     $em->persist($job);
     $em->flush();
 
-    // Let the request begin.
-    // @todo Jenkins should be a service:
-    // $jenkins = $app['jenkins'];
-    $return = 'fixture'; // BS value while we get Jenkins happening.
-/*
-    $jenkins = new Jenkins();
-    $jenkins->setHost($app['config']['jenkins']['host']);
+    $jenkins = $app['jenkins'];
     $jenkins->setToken($app['config']['jenkins']['token']);
-    $jenkins->setBuild($app['config']['jenkins']['job']);
-    $jenkins->setQuery($query);
-    $return = NULL;
-    @$return = $jenkins->send();
-*/
+    $jenkins->setBuild($job->getId());
+    $result = $jenkins->send();
 
     // Check the return to make sure we had a successful submission.
-    if (empty($return)) {
-      return new Response("Jenkins build was not successful.", 504);
+    if ($result === FALSE) {
+      $message = 'Jenkins build was not successful.';
+      $job->setResult('error');
+      $job->setStatus('error');
+      $response = new Response($message, 504);
     }
     else {
-      return new Response('The build is in the queue at the following address: ' . $return, 200);
+      // @todo: Make this json, hateoas, etc.
+      $message = 'The build is in the queue at the following address: ' . $result;
+      $job->setStatus('building');
+      $response = new Response($message, 200);
     }
-    // Default behavior if nothing else works out.
-    $response = new Response('Unable to run job.', 501);
+    $job->log($message);
+    $em->persist($job);
+    $em->flush();
+    return $response;
   }
 
   /**

@@ -36,6 +36,9 @@ class V1ControllerTest extends Api1TestBase {
     );
   }
 
+  /**
+   * Posting a job without any repo/branch/patch content.
+   */
   public function testJobRun400() {
     $client = $this->createClient();
     $crawler = $client->request(
@@ -50,7 +53,29 @@ class V1ControllerTest extends Api1TestBase {
     $this->assertEquals(400, $response->getStatusCode());
   }
 
+  /**
+   * A reasonable expectation that we'd be able to generate a job run.
+   */
   public function testJobRun() {
+    // Mock up Guzzle's response message.
+    $mock_response = $this->getMockBuilder('\GuzzleHttp\Message\MessageInterface')
+      ->setMethods(['getHeader'])
+      ->getMockForAbstractClass();
+    $mock_response->expects($this->once())
+      ->method('getHeader')
+      ->willReturn('not our default url');
+    // Mock Guzzle.
+    $mock_client = $this->getMockBuilder('\GuzzleHttp\Client')
+      ->setMethods(['get'])
+      ->getMock();
+    $mock_client->expects($this->once())
+      ->method('get')
+      ->willReturn($mock_response);
+
+    // Set our Jenkins service to use the mocked Guzzle.
+    $jenkins = $this->app['jenkins'];
+    $jenkins->setClient($mock_client);
+
     $client = $this->createClient();
     $crawler = $client->request(
       'POST', $this->apiPrefix() . '/job',

@@ -1,5 +1,7 @@
 jenkins:
   host:  localhost
+  port:  8080
+  protocol: http
   token: 123456
   job:   test
 

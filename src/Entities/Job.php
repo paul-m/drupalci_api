@@ -72,6 +72,15 @@ class Job implements \JsonSerializable {
   }
 
   /**
+   * Add a line to the log.
+   */
+  public function log($message) {
+    // @todo: figure out sanitizing doctrine ORM fields.
+    $this->log .= "\n" . $message;
+    return $this;
+  }
+
+  /**
    * @return \DateTime
    */
   public function getCreated() {

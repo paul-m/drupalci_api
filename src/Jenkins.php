@@ -45,14 +45,18 @@ class Jenkins {
   /**
    * @var \GuzzleHttp\Client
    */
-  protected $client = false;
+  protected $client = NULL;
 
   /**
    *
-   * @param \GuzzleHttp\Client $guzzle_client
+   * @param string $host
+   * @param string $port
+   * @param string $protocol
    */
-  public function __construct($guzzle_client) {
-    $this->setClient($guzzle_client);
+  public function __construct($host = 'localhost', $port = '80', $protocol = 'http') {
+    $this->host = $host;
+    $this->port = $port;
+    $this->protocol = $protocol;
   }
 
   /**
@@ -67,60 +71,31 @@ class Jenkins {
   }
 
   /**
-   * Helper function to build the request.
-   */
-  public function sendRequest() {
-    // Ensure we have a host.
-    $host = $this->getHost();
-    if (!$host) {
-      return 'Please provide a Jenkins host.';
-    }
-
-    // Ensure we have a build.
-    $build = $this->getBuild();
-    if (!$build) {
-      return 'Please provide a Jenkins build.';
-    }
-
-    // Ensure we have a port.
-    $port = $this->getPort();
-    if (!$port) {
-      return 'Please provide a Jenkins port.';
-    }
-
-    // Add the Token to the query if it is set.
-    $token = $this->getToken();
-    $query = $this->getQuery();
-    if ($token) {
-      $query['token'] = $token;
-    }
-
-    // Post the request to Jenkins.
-    $url = $this->buildUrl();
-    $client = $this->getClient();
-    $response = $client->get($url, [
-      // @todo, Once we get signed certificates we should remove.
-      'verify' => false,
-      'query' => $this->getQuery(),
-    ]);
-
-    return $response;
-  }
-
-  /**
    * Send the data to the remote Jenkins host.
    */
   public function send() {
-    $response = $this->sendRequest();
-
+    if (!$this->getBuild() || !$this->getToken()) {
+      // @todo: Create a better exception class here.
+      throw new \Exception('This Jenkins job needs a build and a token.');
+    }
+    $client = $this->getClient();
+    $url = $this->buildUrl();
+    // Send the request to Jenkins.
+    $response = $client->get(
+      $url,
+      [
+        // @todo, Once we get signed certificates we should remove.
+        'verify' => false,
+        'query' => $this->getQuery(),
+      ]
+    );
+    // @todo: figure out logging error messages from guzzle.
     // We get the location of the build in the queue so we can track it.
     // First we make sure it is in the right format.
-    $url = $this->buildUrl();
     $location = $response->getHeader('Location');
     if (strpos($location, $url)) {
-      return false;
+      return FALSE;
     }
-
     return $location;
   }
 
@@ -142,13 +117,17 @@ class Jenkins {
    * @return \GuzzleHttp\Client
    */
   public function getClient() {
+    // Create a client if there isn't one already.
+    if (empty($this->client)) {
+      $this->client = new GuzzleClient();
+    }
     return $this->client;
   }
 
   /**
    * @param \GuzzleHttp\Client $client
    */
-  public function setClient($client) {
+  public function setClient(GuzzleClient $client) {
     $this->client = $client;
   }
 
@@ -198,6 +177,11 @@ class Jenkins {
    * @return array
    */
   public function getQuery() {
+    // Make sure the token is included in the query.
+    $token = $this->getToken();
+    if ($token) {
+      $this->query['token'] = $token;
+    }
     return $this->query;
   }
 
@@ -205,10 +189,6 @@ class Jenkins {
    * @param array $query
    */
   public function setQuery($query) {
-    $token = $this->getToken();
-    if ($token) {
-      $query['token'] = $token;
-    }
     $this->query = $query;
   }
 

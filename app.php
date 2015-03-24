@@ -13,6 +13,7 @@ use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
 use Dflydev\Silex\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
 use Tobiassjosten\Silex\ResponsibleServiceProvider;
+use API\Jenkins;
 
 $app = new Application();
 
@@ -23,6 +24,27 @@ $config = $app['root_path'] . '/config/config.yml';
 if (file_exists($config)) {
   $app->register(new YamlConfigServiceProvider($config));
 }
+
+$jenkins_options = array_merge(
+  [
+    'host' => 'localhost',
+    'port' => '80',
+    'protocol' => 'http',
+  ],
+  $app['config']['jenkins']
+);
+$app['jenkins'] = $app->share(
+  function ($app) {
+    // @todo: Determine more/better parameters to inject here.
+    $c = $app['config']['jenkins'];
+    return new Jenkins(
+      $c['host'],
+      $c['port'],
+      $c['protocol']
+    );
+  }
+);
+$jenkins_options = [];
 
 $db_options = array_merge(
   [
