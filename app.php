@@ -13,7 +13,8 @@ use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
 use Dflydev\Silex\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
 use Tobiassjosten\Silex\ResponsibleServiceProvider;
-use API\Jenkins;
+use API\Services\Jenkins;
+use API\Services\Results;
 
 $app = new Application();
 
@@ -25,6 +26,7 @@ if (file_exists($config)) {
   $app->register(new YamlConfigServiceProvider($config));
 }
 
+// Set up Jenkins service.
 $jenkins_options = array_merge(
   [
     'host' => 'localhost',
@@ -45,6 +47,14 @@ $app['jenkins'] = $app->share(
   }
 );
 $jenkins_options = [];
+
+// Set up Results service.
+// @todo: Set up config items for this service.
+$app['results'] = $app->share(
+  function ($app) {
+    return new Results();
+  }
+);
 
 $db_options = array_merge(
   [

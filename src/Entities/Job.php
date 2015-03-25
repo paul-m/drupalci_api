@@ -38,7 +38,12 @@ class Job implements \JsonSerializable {
   /** @Column(type="string", length=255, unique=false, nullable=true) */
   protected $result;
 
-  /** @Column(type="text", nullable=true) */
+  /**
+   * Store log information for job progress, so it can be shown and updated
+   * through API requests.
+   * @todo: Decide if this is a good idea.
+   * @Column(type="text", nullable=true)
+   */
   protected $log;
 
   /**
@@ -51,12 +56,7 @@ class Job implements \JsonSerializable {
 
   public static function createFromRequest(Request $request) {
     $query = [];
-    $query_keys = [
-      'repository',
-      'branch',
-      'patch',
-    ];
-    foreach ($query_keys as $query_key) {
+    foreach (['repository', 'branch', 'patch'] as $query_key) {
       $query[$query_key] = $request->get($query_key, '');
     }
     // Sanity check.
@@ -76,6 +76,7 @@ class Job implements \JsonSerializable {
    */
   public function log($message) {
     // @todo: figure out sanitizing doctrine ORM fields.
+    // @todo: figure out if we even want this.
     $this->log .= "\n" . $message;
     return $this;
   }

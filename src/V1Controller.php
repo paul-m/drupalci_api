@@ -14,14 +14,24 @@ class V1Controller extends APIController {
 
   /**
    * Information on how to use the API.
-   * @return message.
+   * @todo: Return stats in human-readable form.
+   *
+   * @return Symfony\Component\HttpFoundation\Response
    */
   public function home() {
     return new Response("Welcome to the DrupalCI API.");
   }
 
   /**
-   * Gather status information about a Jenkins build.
+   * Gather status information about a build.
+   *
+   * Based on this diagram: https://www.previousnext.com.au/sites/default/files/DrupalCI%20Testbot.png
+   * we have to do the following:
+   * - Look for the record in our local DB.
+   * - If we don't have it, 404.
+   * - If it's older than [stale] seconds, GET from Results.
+   * - Store the record.
+   * - Return the record, 200.
    *
    * @param Application $app
    * @param mixed $id
@@ -45,6 +55,16 @@ class V1Controller extends APIController {
 
   /**
    * Runs a job.
+   *
+   * Based on this diagram: https://www.previousnext.com.au/sites/default/files/DrupalCI%20Testbot.png
+   * we have to do the following:
+   * - Create a local record for the request.
+   * - Use the ID for the local record as the test ID.
+   * - Start a Jenkins job.
+   * - Send the entity to the Results server.
+   * - Log. Mechanism to be determined.
+   * - Return record to sender, 200.
+   *
    * @return id.
    */
   public function jobRun(Application $app) {
@@ -64,8 +84,13 @@ class V1Controller extends APIController {
 
     // We have to persist our Job entity in order to generate an ID.
     $em = $app['orm.em'];
-    $em->persist($job);
-    $em->flush();
+    try {
+      $em->persist($job);
+      $em->flush();
+    }
+    catch (\Exception $e) {
+      // Log error, report to Results. Return error response.
+    }
 
     $jenkins = $app['jenkins'];
     $jenkins->setToken($app['config']['jenkins']['token']);
@@ -88,6 +113,12 @@ class V1Controller extends APIController {
     $job->log($message);
     $em->persist($job);
     $em->flush();
+
+    $results = $app['results'];
+    if ($results) {
+      // @todo: POST to Results server.
+    }
+
     return $response;
   }
 

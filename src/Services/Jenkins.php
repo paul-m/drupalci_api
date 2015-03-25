@@ -1,6 +1,6 @@
 <?php
 
-namespace API;
+namespace API\Services;
 
 use Silex\Exception as Exception;
 use GuzzleHttp\Client as GuzzleClient;

@@ -1,8 +1,8 @@
 <?php
 
-namespace API\Tests;
+namespace API\Tests\Services;
 
-use API\Jenkins;
+use API\Services\Jenkins;
 use API\Entities\Job;
 
 /**
