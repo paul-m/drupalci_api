@@ -1,13 +1,48 @@
-DRUPALCI-API
+DrupalCI-API
 ============
 
 ## Overview
 
-Provides a front facing API for the DrupalCI project.
+Provides a front facing API for the DrupalCI project. This allows us to change the specific CI implementations as needed, without changing the API.
 
 ## API
 
-**To be written.**
+Currently the API can only do two things: Start a job, and check on its status.
+
+#### Job
+A Job is a CI task sent off to Jenkins or similar test runner. Drupal.org or other process requests that jobs be started, and then the test runner (Jenkins) runs the CI process.
+
+The Job has the following properties:
+
+- id: Assigned when the Job is created by the API implementation.
+- created: Timestamp of creation.
+- repository: Repository to test against.
+- branch: Branch of the repository to check out.
+- patch: File name of patch to apply to the branch of the repository.
+- status: String indicating build phase.
+- result: Pass/fail.
+- log: Console output of the build thus far.
+
+`POST [/job]`
+
+Starts a job running. Fails if an ID is sent. Requires 'repository' and 'branch', will fail otherwise.
+
+`GET [/job/{id}]`
+
+Query for the record with the given job ID. 404 if the ID does not exist.
+
+#### Proposed extensions
+
+These extensions to the API could be present in a future version.
+
+`PUT [/job/{id}/cancel]`
+
+Stop the job.
+
+`PUT [/job/{id}/restart]`
+
+Restarts the job. Implies cancel. Creates new id.
+
 
 ## Phing
 
