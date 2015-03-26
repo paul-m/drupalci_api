@@ -32,7 +32,20 @@ class V1ControllerTest extends Api1TestBase {
 
     $this->assertEquals(200, $response->getStatusCode());
     $this->assertEquals(
-      '{"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log"}', $response->getContent()
+      '{"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log"}',
+      $response->getContent()
+    );
+  }
+
+  public function testJobStatusJsonp() {
+    $client = $this->createClient();
+    $crawler = $client->request('GET', $this->apiPrefix() . '/job/1', ['callback' => 'jsonp']);
+    $response = $client->getResponse();
+
+    $this->assertEquals(200, $response->getStatusCode());
+    $this->assertEquals(
+      '/**/jsonp({"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log"});',
+      $response->getContent()
     );
   }
 
