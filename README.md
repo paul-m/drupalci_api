@@ -25,7 +25,11 @@ The Job has the following properties:
 
 `POST [/job]`
 
-Starts a job running. Fails if an ID is sent. Requires 'repository' and 'branch', will fail otherwise.
+Starts a job running. 
+
+4xx response if:
+- An ID is sent.
+- Properties 'repository' and 'branch' are not sent.
 
 `GET [/job/{id}]`
 
