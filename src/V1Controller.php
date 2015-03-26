@@ -3,6 +3,7 @@
 namespace API;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Silex\Application;
 use API\Entities\Job;
 
@@ -74,15 +75,21 @@ class V1Controller extends APIController {
 
     // The request we're working on.
     $request = $app['request'];
+    // Error out if the sender is trying to POST a job with an ID.
+    if ($request->get('id', FALSE)) {
+      return new Response('Bad request: Cannot POST job start with an ID.', 400);
+    }
     try {
       $job = Job::createFromRequest($request);
     }
+    // If the request is insufficient, createFromRequest() will throw an exception.
     // @todo Make a better exception type.
     catch (\Exception $e) {
-      return new Response('Bad request.', 400);
+      return new Response($e->getMessage(), 400);
     }
 
-    // We have to persist our Job entity in order to generate an ID.
+    // We have to persist our Job entity in order to generate an ID. Grab the
+    // entity manager service.
     $em = $app['orm.em'];
     try {
       $em->persist($job);
@@ -90,12 +97,13 @@ class V1Controller extends APIController {
     }
     catch (\Exception $e) {
       // Log error, report to Results. Return error response.
+      return new Response($e->getMessage(), 400);
     }
 
-    $jenkins = $app['jenkins'];
-    $jenkins->setToken($app['config']['jenkins']['token']);
-    $jenkins->setBuild($job->getId());
-    $result = $jenkins->send();
+    // Start our Runner service.
+    $runner = $app['runner'];
+    $runner->setJob($job);
+    $result = $runner->sendToJenkins($app['config']['jenkins']['token']);
 
     // Check the return to make sure we had a successful submission.
     if ($result === FALSE) {
@@ -105,19 +113,22 @@ class V1Controller extends APIController {
       $response = new Response($message, 504);
     }
     else {
-      // @todo: Make this json, hateoas, etc.
-      $message = 'The build is in the queue at the following address: ' . $result;
       $job->setStatus('building');
-      $response = new Response($message, 200);
+      $message = 'The build is in the queue at the following address: ' . $result;
+      $output = [
+        'message' => $message,
+        'uri' => $result,
+        'status' => 'building',
+        'job' => json_encode($job),
+      ];
+      $response = new JsonResponse($output, 200);
     }
     $job->log($message);
     $em->persist($job);
     $em->flush();
 
-    $results = $app['results'];
-    if ($results) {
-      // @todo: POST to Results server.
-    }
+    // @todo: Do something with the result of Results.
+    $result = $runner->sendToResults();
 
     return $response;
   }

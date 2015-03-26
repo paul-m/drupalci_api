@@ -8,5 +8,7 @@ namespace API\Services;
  * @todo: Make this more than a placeholder.
  */
 class Results {
-
+  public function ping() {
+    // @todo: Make this better. :-)
+  }
 }

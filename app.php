@@ -15,6 +15,7 @@ use Dflydev\Silex\Provider\DoctrineOrm\DoctrineOrmServiceProvider;
 use Tobiassjosten\Silex\ResponsibleServiceProvider;
 use API\Services\Jenkins;
 use API\Services\Results;
+use API\Services\Runner;
 
 $app = new Application();
 
@@ -53,6 +54,12 @@ $jenkins_options = [];
 $app['results'] = $app->share(
   function ($app) {
     return new Results();
+  }
+);
+
+$app['runner'] = $app->share(
+  function ($app) {
+    return Runner::create($app);
   }
 );
 
