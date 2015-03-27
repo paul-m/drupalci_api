@@ -7,3 +7,6 @@ jenkins:
 
 db.options:
   driver: pdo_sqlite
+
+# How long before we have to update our build status from Jenkins? In seconds.
+job.record.expire: 15

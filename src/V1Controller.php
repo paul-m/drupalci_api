@@ -41,17 +41,14 @@ class V1Controller extends APIController {
     $em = $app['orm.em'];
     $job = $em->find('\API\Entities\Job', $id);
     if ($job) {
+      if ($job->isOlderThan($app['config']['job.record.expire'])) {
+        // Re-load from Jenkins.
+        // Purge/flush to our local db.
+      }
       $response = $app->json($job, 200);
       return $response;
     }
-    // Currently we can't return any information.
-    $job = [
-      'status' => 404,
-      'message' => 'Record could not be found.',
-    ];
-    // @todo: Ping Jenkins to find out an update.
-    $response = $app->json($job, 404);
-    return $response;
+    $app->abort(404, 'Job could not be found.');
   }
 
   /**
@@ -77,7 +74,7 @@ class V1Controller extends APIController {
     $request = $app['request'];
     // Error out if the sender is trying to POST a job with an ID.
     if ($request->get('id', FALSE)) {
-      return new Response('Bad request: Cannot POST job start with an ID.', 400);
+      $app->abort(400, 'Bad request: Cannot POST a job start with an ID.');
     }
     try {
       $job = Job::createFromRequest($request);
@@ -85,7 +82,7 @@ class V1Controller extends APIController {
     // If the request is insufficient, createFromRequest() will throw an exception.
     // @todo Make a better exception type.
     catch (\Exception $e) {
-      return new Response($e->getMessage(), 400);
+      $app->abort(400, $e->getMessage());
     }
 
     // We have to persist our Job entity in order to generate an ID. Grab the
@@ -97,7 +94,7 @@ class V1Controller extends APIController {
     }
     catch (\Exception $e) {
       // Log error, report to Results. Return error response.
-      return new Response($e->getMessage(), 400);
+      $app->abort(400, $e->getMessage());
     }
 
     // Start our Runner service.
@@ -105,27 +102,29 @@ class V1Controller extends APIController {
     $runner->setJob($job);
     $result = $runner->sendToJenkins($app['config']['jenkins']['token']);
 
+    $code = 504;
     // Check the return to make sure we had a successful submission.
     if ($result === FALSE) {
       $message = 'Jenkins build was not successful.';
       $job->setResult('error');
       $job->setStatus('error');
-      $response = new Response($message, 504);
     }
     else {
+      $code = 200;
       $job->setStatus('building');
+      $job->setJenkinsUri($result);
       $message = 'The build is in the queue at the following address: ' . $result;
-      $output = [
-        'message' => $message,
-        'uri' => $result,
-        'status' => 'building',
-        'job' => json_encode($job),
-      ];
-      $response = new JsonResponse($output, 200);
     }
     $job->log($message);
     $em->persist($job);
     $em->flush();
+    $output = [
+      'message' => $message,
+      'jenkinsuri' => $result,
+      'status' => $job->getStatus(),
+      'job' => $job,
+    ];
+    $response = new JsonResponse($output, $code);
 
     // @todo: Do something with the result of Results.
     $result = $runner->sendToResults();

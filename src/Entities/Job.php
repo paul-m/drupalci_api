@@ -23,6 +23,12 @@ class Job implements \JsonSerializable {
    */
   protected $created;
 
+  /**
+   * @Column(type="date", options={"default" = "1990-01-01"})
+   * @var \DateTime
+   */
+  protected $lastCheck;
+
   /** @Column(type="string", length=255, unique=false, nullable=false) */
   protected $repository;
 
@@ -38,6 +44,9 @@ class Job implements \JsonSerializable {
   /** @Column(type="string", length=255, unique=false, nullable=true) */
   protected $result;
 
+  /** @Column(type="string", length=255, unique=false, nullable=true) */
+  protected $jenkinsUri;
+
   /**
    * Store log information for job progress, so it can be shown and updated
    * through API requests.
@@ -50,8 +59,10 @@ class Job implements \JsonSerializable {
    * Construct a Job object.
    */
   public function __construct() {
-    // We must put a DateTime object in created or Doctrine will complain.
+    // We must put a DateTime object in some properties or Doctrine will
+    // complain.
     $this->created = new \DateTime();
+    $this->lastCheck = new \DateTime();
   }
 
   public static function createFromRequest(Request $request) {
@@ -79,6 +90,17 @@ class Job implements \JsonSerializable {
     // @todo: figure out if we even want this.
     $this->log .= "\n" . $message;
     return $this;
+  }
+
+  /**
+   * Check if this record is old enough to expire and re-request from Jenkins.
+   *
+   * @param int $seconds
+   *
+   * @return bool
+   */
+  public function isOlderThan($seconds) {
+    return FALSE;
   }
 
   /**
@@ -203,6 +225,27 @@ class Job implements \JsonSerializable {
   }
 
   /**
+   * Set Jenkins URI
+   *
+   * @param string $result
+   * @return Job
+   */
+  public function setJenkinsUri($jenkinsUri) {
+    $this->jenkinsUri = $jenkinsUri;
+
+    return $this;
+  }
+
+  /**
+   * Get Jenkins URI
+   *
+   * @return string
+   */
+  public function getJenkinsUri() {
+    return $this->jenkinsUri;
+  }
+
+  /**
    * Set log
    *
    * @param string $log
@@ -233,6 +276,7 @@ class Job implements \JsonSerializable {
       'status',
       'result',
       'log',
+      'jenkinsUri'
     ];
     foreach ($properties as $property) {
       $result->$property = $this->$property;

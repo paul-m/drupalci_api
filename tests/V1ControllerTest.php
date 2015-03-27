@@ -20,9 +20,6 @@ class V1ControllerTest extends Api1TestBase {
     $crawler = $client->request('GET', $this->apiPrefix() . '/job/0');
     $response = $client->getResponse();
     $this->assertEquals(404, $response->getStatusCode());
-    $json = json_decode($response->getContent());
-    $this->assertEquals(404, $json->status);
-    $this->assertNotEmpty($json->message);
   }
 
   public function testJobStatus() {
@@ -32,7 +29,7 @@ class V1ControllerTest extends Api1TestBase {
 
     $this->assertEquals(200, $response->getStatusCode());
     $this->assertEquals(
-      '{"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log"}',
+      '{"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log","jenkinsUri":null}',
       $response->getContent()
     );
   }
@@ -44,7 +41,7 @@ class V1ControllerTest extends Api1TestBase {
 
     $this->assertEquals(200, $response->getStatusCode());
     $this->assertEquals(
-      '/**/jsonp({"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log"});',
+      '/**/jsonp({"id":1,"repository":"test_repository","branch":"test_branch","patch":"test_patch","status":"test_status","result":"test_result","log":"test_log","jenkinsUri":null});',
       $response->getContent()
     );
   }
@@ -100,6 +97,10 @@ class V1ControllerTest extends Api1TestBase {
     $response = $client->getResponse();
 
     $this->assertEquals(200, $response->getStatusCode());
+    $this->assertEquals(
+      '{"message":"The build is in the queue at the following address: not our default url","jenkinsuri":"not our default url","status":"building","job":{"id":2,"repository":"r","branch":"b","patch":"p","status":"building","result":null,"log":"\nThe build is in the queue at the following address: not our default url","jenkinsUri":"not our default url"}}',
+      $response->getContent()
+    );
   }
 
 }

@@ -63,7 +63,7 @@ class JobTest extends \PHPUnit_Framework_TestCase {
     );
     $job = Job::createFromRequest($request);
     $this->assertEquals(
-      '{"id":null,"repository":"repository_test","branch":"branch_test","patch":"patch_test","status":null,"result":null,"log":null}',
+      '{"id":null,"repository":"repository_test","branch":"branch_test","patch":"patch_test","status":null,"result":null,"log":null,"jenkinsUri":null}',
       json_encode($job->jsonSerialize())
     );
   }
